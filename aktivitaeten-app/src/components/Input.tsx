@@ -1,0 +1,21 @@
+import React from 'react';
+
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+}
+
+const Input: React.FC<InputProps> = ({ label, ...props }) => {
+  return (
+    <div className="mb-4">
+      <label className="block text-claude-text text-sm font-bold mb-2" htmlFor={props.id}>
+        {label}
+      </label>
+      <input
+        className="shadow appearance-none border rounded w-full py-2 px-3 text-claude-text leading-tight focus:outline-none focus:shadow-outline"
+        {...props}
+      />
+    </div>
+  );
+};
+
+export default Input;
