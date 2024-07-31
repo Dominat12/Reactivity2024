@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Activity, ActivityInput } from '../services/api';
 
 interface ActivityFormProps {
-  onAddActivity: (activity: ActivityInput) => void;
+  onAddActivity?: (activity: ActivityInput) => void;
   onUpdateActivity: (activity: Activity) => void;
   editingActivity: Activity | null;
 }
@@ -66,16 +66,16 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onAddActivity, onUpdateActi
       maxPrice,
       minParticipants,
       maxParticipants,
-      imagePath // Include imagePath in the data
+      imagePath
     };
 
     if (editingActivity) {
-        onUpdateActivity({ ...activityData, id: editingActivity.id } as Activity);
-      } else {
-        onAddActivity(activityData);
-      }
-      resetForm();
-    };
+      onUpdateActivity({ ...activityData, id: editingActivity.id } as Activity);
+    } else if (onAddActivity) {
+      onAddActivity(activityData);
+    }
+    resetForm();
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
