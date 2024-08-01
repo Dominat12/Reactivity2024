@@ -2,7 +2,8 @@ import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: 'http://localhost:8080',
+  withCredentials: true
 });
 
 export interface Activity {
@@ -41,3 +42,5 @@ export const createActivity = (activity: ActivityInput) => api.post<Activity>('/
 export const updateActivity = (id: number, activity: ActivityInput) => api.put<Activity>(`/activities/${id}`, activity);
 export const deleteActivity = (id: number) => api.delete(`/activities/${id}`);
 export const participateInActivity = (id: number) => api.put(`/activities/${id}/participate`);
+
+export default api;
