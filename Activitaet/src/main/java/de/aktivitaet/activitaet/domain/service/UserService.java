@@ -1,7 +1,7 @@
-package de.aktivitaet.activitaet.service;
+package de.aktivitaet.activitaet.domain.service;
 
-import de.aktivitaet.activitaet.model.User;
-import de.aktivitaet.activitaet.repository.UserRepository;
+import de.aktivitaet.activitaet.domain.model.User;
+import de.aktivitaet.activitaet.domain.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

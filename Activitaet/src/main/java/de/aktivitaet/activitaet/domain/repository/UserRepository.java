@@ -1,6 +1,6 @@
-package de.aktivitaet.activitaet.repository;
+package de.aktivitaet.activitaet.domain.repository;
 
-import de.aktivitaet.activitaet.model.User;
+import de.aktivitaet.activitaet.domain.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

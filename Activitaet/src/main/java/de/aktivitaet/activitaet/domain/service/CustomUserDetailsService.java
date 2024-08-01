@@ -1,6 +1,6 @@
-package de.aktivitaet.activitaet.service;
+package de.aktivitaet.activitaet.domain.service;
 
-import de.aktivitaet.activitaet.repository.UserRepository;
+import de.aktivitaet.activitaet.domain.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

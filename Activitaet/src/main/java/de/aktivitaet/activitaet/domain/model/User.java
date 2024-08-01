@@ -1,4 +1,4 @@
-package de.aktivitaet.activitaet.model;
+package de.aktivitaet.activitaet.domain.model;
 
 import jakarta.persistence.*;
 import lombok.Data;

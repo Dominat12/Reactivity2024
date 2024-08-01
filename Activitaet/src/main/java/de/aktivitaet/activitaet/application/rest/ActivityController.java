@@ -1,21 +1,26 @@
-package de.aktivitaet.activitaet.controller;
+package de.aktivitaet.activitaet.application.rest;
 
-import de.aktivitaet.activitaet.model.Activity;
-import de.aktivitaet.activitaet.repository.ActivityRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import de.aktivitaet.activitaet.domain.model.Activity;
+import de.aktivitaet.activitaet.domain.model.User;
+import de.aktivitaet.activitaet.domain.repository.ActivityRepository;
+import de.aktivitaet.activitaet.domain.repository.UserRepository;
+import lombok.Data;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Data
 @RestController
 @RequestMapping("/activities")
 @CrossOrigin(origins = "http://localhost:5173")
 public class ActivityController {
 
-    @Autowired
-    private ActivityRepository activityRepository;
+    private final ActivityRepository activityRepository;
+    private final UserRepository userRepository;
 
     @GetMapping
     public List<Activity> getAllActivities() {
@@ -24,8 +29,15 @@ public class ActivityController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public Activity createActivity(@RequestBody Activity activity) {
-        return activityRepository.save(activity);
+    public ResponseEntity<Activity> createActivity(@RequestBody Activity activity) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        User creator = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        activity.setCreator(creator);
+        Activity savedActivity = activityRepository.save(activity);
+        return ResponseEntity.ok(savedActivity);
     }
 
     @PutMapping("/{id}")

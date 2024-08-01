@@ -1,9 +1,9 @@
-package de.aktivitaet.activitaet.service;
+package de.aktivitaet.activitaet.domain.service;
 
-import de.aktivitaet.activitaet.model.Activity;
-import de.aktivitaet.activitaet.model.User;
-import de.aktivitaet.activitaet.repository.ActivityRepository;
-import de.aktivitaet.activitaet.repository.UserRepository;
+import de.aktivitaet.activitaet.domain.model.Activity;
+import de.aktivitaet.activitaet.domain.model.User;
+import de.aktivitaet.activitaet.domain.repository.ActivityRepository;
+import de.aktivitaet.activitaet.domain.repository.UserRepository;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 

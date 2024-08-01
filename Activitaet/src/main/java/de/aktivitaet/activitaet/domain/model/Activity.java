@@ -1,4 +1,4 @@
-package de.aktivitaet.activitaet.model;
+package de.aktivitaet.activitaet.domain.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -25,6 +25,10 @@ public class Activity {
     private int maxParticipants;
     @Column(nullable = false)
     private String imagePath = "/images/default-activity.jpg";
+
+    @ManyToOne
+    @JoinColumn(name = "creator_id")
+    private User creator;
 
     // Konstruktor
     public Activity() {
