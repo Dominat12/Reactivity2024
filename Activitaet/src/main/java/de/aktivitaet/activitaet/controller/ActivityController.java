@@ -4,15 +4,15 @@ import de.aktivitaet.activitaet.model.Activity;
 import de.aktivitaet.activitaet.repository.ActivityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/activities")
-@CrossOrigin(origins = "http://localhost:5173")  // Erlaubt CORS für Ihre React-Anwendung
+@CrossOrigin(origins = "http://localhost:5173")
 public class ActivityController {
-
 
     @Autowired
     private ActivityRepository activityRepository;
@@ -23,11 +23,13 @@ public class ActivityController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public Activity createActivity(@RequestBody Activity activity) {
         return activityRepository.save(activity);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Activity> updateActivity(@PathVariable Long id, @RequestBody Activity activityDetails) {
         Activity activity = activityRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Activity not found with id " + id));
@@ -48,6 +50,7 @@ public class ActivityController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteActivity(@PathVariable Long id) {
         Activity activity = activityRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Activity not found with id " + id));
