@@ -61,7 +61,11 @@ public class DataGenerationService {
         Activity activity =
             new Activity(
                 name,
-                "Beschreibung für " + name,
+                String.format(
+                    "Tauchen Sie ein in die spannende Welt des %s und erleben Sie Momente voller Abenteuer, "
+                        + "Herausforderung und persönlichem Wachstum. Diese faszinierende Aktivität bietet Ihnen die perfekte Gelegenheit, "
+                        + "Ihre Grenzen zu erweitern, neue Fähigkeiten zu entwickeln und unvergessliche Erinnerungen zu schaffen. ",
+                    name),
                 random.nextInt(5) + 1,
                 location,
                 startTime,

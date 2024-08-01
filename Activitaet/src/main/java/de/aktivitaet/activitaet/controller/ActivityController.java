@@ -55,4 +55,13 @@ public class ActivityController {
         activityRepository.delete(activity);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Activity>  getActivity(@PathVariable Long id) {
+        var activity = activityRepository.findById(id);
+        if (activity.isPresent() && activity.get() != null) {
+            return ResponseEntity.ok(activity.get());
+        }
+        return ResponseEntity.notFound().build();
+    }
 }

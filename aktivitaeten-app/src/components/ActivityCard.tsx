@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { MapPin, Clock, Users, Star, DollarSign, UserPlus, UserMinus, Edit, Trash } from 'lucide-react';
 import { Activity } from '../services/api';
 
@@ -19,8 +20,10 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticipate, on
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
-      <img src={activity.imagePath} alt={activity.name} className="w-full h-48 object-cover rounded-md mb-4" />
-      <h3 className="text-xl font-semibold mb-2 text-claude-text">{activity.name}</h3>
+      <Link to={`/activity/${activity.id}`}>
+        <img src={activity.imagePath} alt={activity.name} className="w-full h-48 object-cover rounded-md mb-4" />
+        <h3 className="text-xl font-semibold mb-2 text-claude-text">{activity.name}</h3>
+      </Link>
       <div className="space-y-2 text-sm text-claude-subtext">
         <div className="flex items-center">
           <MapPin className="w-4 h-4 mr-2" />

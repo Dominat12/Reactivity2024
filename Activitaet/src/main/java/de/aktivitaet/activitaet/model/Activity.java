@@ -12,6 +12,8 @@ public class Activity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String description;
     private int rating;
     private String location;
