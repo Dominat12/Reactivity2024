@@ -65,4 +65,9 @@ public class Activity {
         this.imagePath = imagePath;
     }
 
+
+    public boolean isCreatedBy(User user) {
+        return this.creator != null && this.creator.equals(user);
+    }
+
 }
