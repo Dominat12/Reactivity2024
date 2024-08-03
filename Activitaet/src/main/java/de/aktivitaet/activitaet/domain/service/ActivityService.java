@@ -74,4 +74,9 @@ public class ActivityService {
     public List<Activity> getAllActivities() {
         return activityRepository.findAll();
     }
+
+    public List<Activity> getActivityByCreatorName(String username) {
+        User creator = userService.getUserByName(username);
+        return activityRepository.findByCreator(creator);
+    }
 }

@@ -39,8 +39,8 @@ public class ActivityController {
     }
 
     @GetMapping
-    public List<Activity> getAllActivities() {
-        return activityService.getAllActivities();
+    public ResponseEntity<List<Activity>>  getAllActivities() {
+        return ResponseEntity.ok(activityService.getAllActivities());//TODO kein ResponseBody?!
     }
 
     @GetMapping("/{id}")
@@ -58,10 +58,10 @@ public class ActivityController {
      * @param activity the activity details to be updated, provided in the request body
      * @param authentication the authentication object containing the user's details
      * @return a ResponseEntity containing the updated activity
-     * @throws ResourceNotFoundException if the activity is not found
+     * @throws ResourceNotFoundException if the activity or user is not found
      * @throws UnauthorizedAccessException if the user is not authorized to update the activity
      * @apiNote This endpoint requires authentication. Only the creator of the activity can update it.
-     *          Returns HTTP 200 OK on success, 404 Not Found if the activity doesn't exist,
+     *          Returns HTTP 200 OK on success, 404 Not Found if the activity doesn't exist, //TODO muss dies noch mit dem ReponseEntity Code umgesetzt werden, damit der Fehlercode passt? try catch?
      *          or 403 Forbidden if the user is not authorized.
      */
     @PutMapping("/{id}")
@@ -73,10 +73,33 @@ public class ActivityController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteActivity(@PathVariable Long id, Authentication authentication) {
-        String username = authentication.getName();
+        String username = authentication.getName(); //TODO Variable sparen, lohnt sich das?
         activityService.deleteActivity(id, username);
         return ResponseEntity.ok().build();
     }
 
+  /**
+   * Returns all activities created by the authenticated user.
+   *
+   * @param authentication the authentication object containing the user's details
+   * @return a ResponseEntity containing a list of activities created by the user
+   * @throws ResourceNotFoundException if the user is not found
+   * @apiNote This endpoint requires authentication. Only the creator of the activity can update it.
+   *          Returns HTTP 200 OK on success, 404 Not Found if the activity doesn't exist, //TODO muss dies noch mit dem ReponseEntity Code umgesetzt werden, damit der Fehlercode passt? try catch?
+   *          or 403 Forbidden if the user is not authorized.
+   *
+   */
+  @GetMapping("/creator")
+  public ResponseEntity<List<Activity>> getActivity(Authentication authentication) {
+        String username = authentication.getName();
+        List<Activity> activities = activityService.getActivityByCreatorName(username);
 
+        if (activities.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(activities.size()))
+                .body(activities);
+    }
 }
