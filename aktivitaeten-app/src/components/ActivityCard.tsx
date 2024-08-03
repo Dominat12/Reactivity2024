@@ -5,7 +5,7 @@ import { Activity } from '../services/api';
 
 interface ActivityCardProps {
   activity: Activity;
-  onParticipate: (id: number) => void;
+  onParticipate?: (id: number) => void;
   onEdit: () => void;
   onDelete: () => void;
 }
@@ -14,8 +14,10 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticipate, on
   const [isParticipating, setIsParticipating] = useState(false);
 
   const toggleParticipation = () => {
-    setIsParticipating(!isParticipating);
-    onParticipate(activity.id);
+    if (onParticipate) {
+      setIsParticipating(!isParticipating);
+      onParticipate(activity.id);
+    }
   };
 
   return (
@@ -57,26 +59,28 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticipate, on
         >
           <Edit className="w-5 h-5" />
         </button>
-        <button
-          className={`flex items-center ${
-            isParticipating
-              ? 'text-claude-red hover:text-[#FF7875]'
-              : 'text-claude-green hover:text-[#34D399]'
-          } transition-colors duration-300`}
-          onClick={toggleParticipation}
-        >
-          {isParticipating ? (
-            <>
-              <UserMinus className="w-5 h-5 mr-1" />
-              Abmelden
-            </>
-          ) : (
-            <>
-              <UserPlus className="w-5 h-5 mr-1" />
-              Teilnehmen
-            </>
-          )}
-        </button>
+        {onParticipate && (
+          <button
+            className={`flex items-center ${
+              isParticipating
+                ? 'text-claude-red hover:text-[#FF7875]'
+                : 'text-claude-green hover:text-[#34D399]'
+            } transition-colors duration-300`}
+            onClick={toggleParticipation}
+          >
+            {isParticipating ? (
+              <>
+                <UserMinus className="w-5 h-5 mr-1" />
+                Abmelden
+              </>
+            ) : (
+              <>
+                <UserPlus className="w-5 h-5 mr-1" />
+                Teilnehmen
+              </>
+            )}
+          </button>
+        )}
         <button
           className="text-claude-subtext hover:text-claude-red transition-colors duration-300"
           onClick={onDelete}

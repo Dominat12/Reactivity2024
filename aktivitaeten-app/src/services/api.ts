@@ -42,5 +42,6 @@ export const createActivity = (activity: ActivityInput) => api.post<Activity>('/
 export const updateActivity = (id: number, activity: ActivityInput) => api.put<Activity>(`/activities/${id}`, activity);
 export const deleteActivity = (id: number) => api.delete(`/activities/${id}`);
 export const participateInActivity = (id: number) => api.put(`/activities/${id}/participate`);
+export const getUserActivities = () => api.get<Activity[]>('/activities/creator');
 
 export default api;

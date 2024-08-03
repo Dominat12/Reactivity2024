@@ -6,6 +6,7 @@ import Login from './components/Login';
 import ActivitiesView from './views/ActivitiesView';
 import ActivityDetailView from './views/ActivityDetailView';
 import CreateActivityView from './views/CreateActivityView';
+import UserActivitiesView from './views/UserActivitiesView';
 import NavigationBar from './components/NavigationBar';
 
 const App: React.FC = () => {
@@ -20,6 +21,7 @@ const App: React.FC = () => {
               <Route path="/" element={<ActivitiesView />} />
               <Route path="/activity/:id" element={<ActivityDetailView />} />
               <Route path="/create" element={<CreateActivityView />} />
+              <Route path="/my-activities" element={<UserActivitiesView />} />
             </Route>
           </Routes>
         </div>
