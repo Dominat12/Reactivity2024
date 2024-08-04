@@ -1,11 +1,13 @@
 package de.aktivitaet.activitaet.domain.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
+@AllArgsConstructor
 @Entity
 public class Activity {
     @Id

@@ -3,10 +3,14 @@ package de.aktivitaet.activitaet.application.dto;
 import de.aktivitaet.activitaet.domain.model.User;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Builder
-@Data
+@Getter
+@Setter
 public class ActivityDTO {
     private Long id;
     private String name;
