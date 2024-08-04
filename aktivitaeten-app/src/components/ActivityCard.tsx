@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Clock, Users, Star, DollarSign, UserPlus, UserMinus, Edit, Trash, Crown } from 'lucide-react';
+import { MapPin, Clock, Users, Star, DollarSign, UserPlus, Edit, Trash, Crown } from 'lucide-react';
 import { Activity } from '../services/api';
-
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 
@@ -14,15 +13,6 @@ interface ActivityCardProps {
 }
 
 const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticipate, onEdit, onDelete }) => {
-  const [isParticipating, setIsParticipating] = useState(false);
-
-  const toggleParticipation = () => {
-    if (onParticipate) {
-      setIsParticipating(!isParticipating);
-      onParticipate(activity.id);
-    }
-  };
-
   return (
     <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 relative">
       {activity.currentUserCreator && (
@@ -32,7 +22,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticipate, on
           </div>
         </Tippy>
       )}
-    <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
       <Link to={`/activity/${activity.id}`}>
         <img src={activity.imagePath} alt={activity.name} className="w-full h-48 object-cover rounded-md mb-4" />
         <h3 className="text-xl font-semibold mb-2 text-claude-text">{activity.name}</h3>
@@ -64,42 +53,31 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticipate, on
         </div>
       </div>
       <div className="flex justify-between items-center mt-4">
-        <button
-          className="text-claude-subtext hover:text-claude-text transition-colors duration-300"
-          onClick={onEdit}
-        >
-          <Edit className="w-5 h-5" />
-        </button>
-        {onParticipate && (
+        {activity.currentUserCreator ? (
+          <>
+            <button
+              className="text-claude-subtext hover:text-claude-text transition-colors duration-300"
+              onClick={onEdit}
+            >
+              <Edit className="w-5 h-5" />
+            </button>
+            <button
+              className="text-claude-subtext hover:text-claude-red transition-colors duration-300"
+              onClick={onDelete}
+            >
+              <Trash className="w-5 h-5" />
+            </button>
+          </>
+        ) : onParticipate ? (
           <button
-            className={`flex items-center ${
-              isParticipating
-                ? 'text-claude-red hover:text-[#FF7875]'
-                : 'text-claude-green hover:text-[#34D399]'
-            } transition-colors duration-300`}
-            onClick={toggleParticipation}
+            className="flex items-center text-claude-green hover:text-[#34D399] transition-colors duration-300"
+            onClick={() => onParticipate(activity.id)}
           >
-            {isParticipating ? (
-              <>
-                <UserMinus className="w-5 h-5 mr-1" />
-                Abmelden
-              </>
-            ) : (
-              <>
-                <UserPlus className="w-5 h-5 mr-1" />
-                Teilnehmen
-              </>
-            )}
+            <UserPlus className="w-5 h-5 mr-1" />
+            Teilnehmen
           </button>
-        )}
-        <button
-          className="text-claude-subtext hover:text-claude-red transition-colors duration-300"
-          onClick={onDelete}
-        >
-          <Trash className="w-5 h-5" />
-        </button>
+        ) : null}
       </div>
-    </div>
     </div>
   );
 };

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getActivity, updateActivity, Activity } from '../services/api';
-import { MapPin, Clock, Users, Star, DollarSign, Calendar, Thermometer, ArrowLeft, Crown } from 'lucide-react';
-
+import { getActivity, updateActivity, deleteActivity, participateInActivity, Activity } from '../services/api';
+import { MapPin, Clock, Users, Star, DollarSign, Calendar, ArrowLeft, Crown, Edit, Trash, UserPlus, UserMinus } from 'lucide-react';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 
@@ -26,6 +25,8 @@ const ActivityDetailView: React.FC = () => {
       setError(null);
       const response = await getActivity(activityId);
       setActivity(response.data);
+      // Here you would typically check if the current user is participating
+      // setIsParticipating(checkIfUserIsParticipating(response.data));
     } catch (error) {
       console.error('Fehler beim Laden der Aktivität:', error);
       setError('Aktivität konnte nicht geladen werden. Bitte versuchen Sie es später erneut.');
@@ -34,20 +35,35 @@ const ActivityDetailView: React.FC = () => {
     }
   };
 
-  const handleUpdateActivity = async (updatedActivity: Activity) => {
-    try {
-      await updateActivity(updatedActivity.id, updatedActivity);
-      setActivity(updatedActivity);
-      // Optionally, you can show a success message here
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren der Aktivität:', error);
-      setError('Aktivität konnte nicht aktualisiert werden. Bitte versuchen Sie es später erneut.');
+  const handleEdit = () => {
+    if (activity) {
+      navigate(`/edit/${activity.id}`);
     }
   };
 
-  const toggleParticipation = () => {
-    setIsParticipating(!isParticipating);
-    // Here you would typically update the backend
+  const handleDelete = async () => {
+    if (activity && window.confirm('Möchten Sie diese Aktivität wirklich löschen?')) {
+      try {
+        await deleteActivity(activity.id);
+        navigate('/');
+      } catch (error) {
+        console.error('Fehler beim Löschen der Aktivität:', error);
+        setError('Aktivität konnte nicht gelöscht werden. Bitte versuchen Sie es später erneut.');
+      }
+    }
+  };
+
+  const handleParticipation = async () => {
+    if (activity && !activity.currentUserCreator) {
+      try {
+        await participateInActivity(activity.id);
+        setIsParticipating(!isParticipating);
+        // Hier würden Sie normalerweise die Aktivität neu laden oder den Teilnehmerstatus aktualisieren
+      } catch (error) {
+        console.error('Fehler bei der Teilnahme/Abmeldung:', error);
+        setError('Aktion konnte nicht durchgeführt werden. Bitte versuchen Sie es später erneut.');
+      }
+    }
   };
 
   if (isLoading) {
@@ -74,11 +90,25 @@ const ActivityDetailView: React.FC = () => {
             <ArrowLeft className="w-6 h-6 text-gray-600" />
           </button>
           {activity.currentUserCreator && (
-            <Tippy content="Du bist der Ersteller dieser Aktivität">
-              <div className="absolute top-4 right-4 bg-claude-yellow text-white p-2 rounded-full cursor-pointer">
-                <Crown size={24} />
-              </div>
-            </Tippy>
+            <div className="absolute top-4 right-4 flex space-x-2">
+              <Tippy content="Du bist der Ersteller dieser Aktivität">
+                <div className="bg-claude-yellow text-white p-2 rounded-full cursor-pointer">
+                  <Crown size={24} />
+                </div>
+              </Tippy>
+              <button
+                onClick={handleEdit}
+                className="bg-claude-blue text-white p-2 rounded-full hover:bg-blue-600 transition-colors duration-300"
+              >
+                <Edit size={24} />
+              </button>
+              <button
+                onClick={handleDelete}
+                className="bg-claude-red text-white p-2 rounded-full hover:bg-red-600 transition-colors duration-300"
+              >
+                <Trash size={24} />
+              </button>
+            </div>
           )}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
             <h1 className="text-4xl font-bold text-white mb-2">{activity.name}</h1>
@@ -139,16 +169,32 @@ const ActivityDetailView: React.FC = () => {
             </div>
           </div>
           
-          <button 
-            className={`w-full py-3 px-4 rounded-lg text-white font-semibold transition-colors duration-300 ${
-              isParticipating
-                ? 'bg-red-500 hover:bg-red-600'
-                : 'bg-green-500 hover:bg-green-600'
-            }`}
-            onClick={toggleParticipation}
-          >
-            {isParticipating ? 'Teilnahme stornieren' : 'Jetzt teilnehmen'}
-          </button>
+          {activity.currentUserCreator ? (
+            <div className="text-claude-subtext mt-4">
+              Dies ist deine eigene Aktivität. Du kannst nicht als Teilnehmer beitreten.
+            </div>
+          ) : (
+            <button 
+              className={`w-full py-3 px-4 rounded-lg text-white font-semibold transition-colors duration-300 flex items-center justify-center ${
+                isParticipating
+                  ? 'bg-red-500 hover:bg-red-600'
+                  : 'bg-green-500 hover:bg-green-600'
+              }`}
+              onClick={handleParticipation}
+            >
+              {isParticipating ? (
+                <>
+                  <UserMinus className="w-5 h-5 mr-2" />
+                  Teilnahme stornieren
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-5 h-5 mr-2" />
+                  Jetzt teilnehmen
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>
