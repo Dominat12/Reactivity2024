@@ -1,5 +1,6 @@
 package de.aktivitaet.activitaet.domain.service;
 
+import de.aktivitaet.activitaet.application.dto.ActivityDTO;
 import de.aktivitaet.activitaet.application.rest.ActivityController;
 import de.aktivitaet.activitaet.domain.model.Activity;
 import de.aktivitaet.activitaet.domain.model.User;
@@ -7,27 +8,32 @@ import de.aktivitaet.activitaet.domain.repository.ActivityRepository;
 import de.aktivitaet.activitaet.domain.repository.UserRepository;
 import de.aktivitaet.activitaet.infrastructure.exception.ResourceNotFoundException;
 import de.aktivitaet.activitaet.infrastructure.exception.UnauthorizedAccessException;
+import de.aktivitaet.activitaet.infrastructure.mapper.ActivityMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Slf4j
 @Service
 public class ActivityService {
     private final ActivityRepository activityRepository;
-    private final UserRepository userRepository;
+    private final ActivityMapper activityMapper;
     private final ActivityUtility activityUtility;
+
+    private final UserRepository userRepository;
     private final UserService userService;
 
-
-    public Activity createActivity(Activity activity, String creatorUsername) {
+    public ActivityDTO createActivity(ActivityDTO activityDTO, String creatorUsername) {
         User creator = userService.getUserByName(creatorUsername);
+        Activity activity = activityMapper.toEntity(activityDTO);
         activity.setCreator(creator);
-        return activityRepository.save(activity);
+        Activity savedActivity = activityRepository.save(activity);
+        return activityMapper.toDTO(savedActivity, creatorUsername);
     }
 
     /**
@@ -39,18 +45,17 @@ public class ActivityService {
      * @throws UnauthorizedAccessException if the user is not the creator of the activity
      * @see ActivityController#updateActivity(Long id, Activity activity, Authentication authentication) for the API endpoint
      */
-    public Activity updateActivity(Long id, Activity updatedActivity, String username) {
+    public ActivityDTO updateActivity(Long id, ActivityDTO updatedActivityDTO, String username) {
         Activity existingActivity = getActivityById(id);
         User user = userService.getUserByName(username);
 
         if (!existingActivity.isCreatedBy(user)) {
-            //TODO: Die UnauthorizedAccessException könnte man darum erweitern, dass der Grund als Variable übergeben wird
-            throw new UnauthorizedAccessException("You are not authorized to update this activity. Only the activity creator can make changes.");
+            throw new UnauthorizedAccessException("You are not authorized to update this activity.");
         }
 
-        existingActivity = activityUtility.updateActivityWithChanges(updatedActivity, existingActivity);
-
-        return activityRepository.save(existingActivity);
+        activityMapper.updateEntityFromDTO(updatedActivityDTO, existingActivity);
+        Activity savedActivity = activityRepository.save(existingActivity);
+        return activityMapper.toDTO(savedActivity, username);
     }
 
     public void deleteActivity(Long id, String username) {
@@ -58,7 +63,7 @@ public class ActivityService {
         User user = userService.getUserByName(username);
 
         if (!activity.isCreatedBy(user)) {
-            throw new UnauthorizedAccessException("You are not authorized to delete this activity. Only the activity creator can make changes.");
+            throw new UnauthorizedAccessException("You are not authorized to delete this activity.");
         }
 
         activityRepository.deleteById(id);
@@ -66,17 +71,29 @@ public class ActivityService {
 
 
     //// UTILITY
-    public Activity getActivityById(Long id) {
+    public ActivityDTO getActivityById(Long id, String currentUsername) {
+        Activity activity = activityRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Activity not found with id:'" + id + "'"));
+        return activityMapper.toDTO(activity, currentUsername);
+    }
+
+    public List<ActivityDTO> getAllActivities(String currentUsername) {
+        List<Activity> activities = activityRepository.findAll();
+        return activities.stream()
+                .map(activity ->  activityMapper.toDTO(activity, currentUsername))
+                .collect(Collectors.toList());
+    }
+
+    public List<ActivityDTO> getActivityByCreatorName(String username) {
+        User creator = userService.getUserByName(username);
+        List<Activity> activities = activityRepository.findByCreator(creator);
+        return activities.stream()
+                .map(activity -> activityMapper.toDTO(activity, username))
+                .collect(Collectors.toList());
+    }
+
+    private Activity getActivityById(Long id) {
         return activityRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Activity not found with id:'" + id + "'"));
-    }
-
-    public List<Activity> getAllActivities() {
-        return activityRepository.findAll();
-    }
-
-    public List<Activity> getActivityByCreatorName(String username) {
-        User creator = userService.getUserByName(username);
-        return activityRepository.findByCreator(creator);
     }
 }

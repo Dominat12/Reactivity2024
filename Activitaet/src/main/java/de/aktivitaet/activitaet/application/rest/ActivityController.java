@@ -1,5 +1,6 @@
 package de.aktivitaet.activitaet.application.rest;
 
+import de.aktivitaet.activitaet.application.dto.ActivityDTO;
 import de.aktivitaet.activitaet.domain.model.Activity;
 import de.aktivitaet.activitaet.domain.service.ActivityService;
 import de.aktivitaet.activitaet.infrastructure.exception.ResourceNotFoundException;
@@ -31,26 +32,29 @@ public class ActivityController {
    * @return a ResponseEntity containing the created activity
    */
   @PostMapping
-  public ResponseEntity<Activity> createActivity(
-      @RequestBody Activity activity, Authentication authentication) {
+  public ResponseEntity<ActivityDTO> createActivity(
+          @RequestBody ActivityDTO activity, Authentication authentication) {
     log.debug("Creating activity: {}", activity);
     String creatorUsername = authentication.getName();
-    Activity createdActivity = activityService.createActivity(activity, creatorUsername);
+    ActivityDTO createdActivity = activityService.createActivity(activity, creatorUsername);
     return ResponseEntity.ok(createdActivity);
   }
 
   @GetMapping
-  public ResponseEntity<List<Activity>> getAllActivities() {
+  public ResponseEntity<List<ActivityDTO>> getAllActivities(Authentication authentication) {
     log.debug("Getting all activities");
-    return ResponseEntity.ok(activityService.getAllActivities()); // TODO kein ResponseBody?!
+    String currentUsername = authentication.getName();
+    return ResponseEntity.ok(activityService.getAllActivities(currentUsername));
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<Activity> getActivity(@PathVariable Long id) {
+  public ResponseEntity<ActivityDTO> getActivity(@PathVariable Long id, Authentication authentication) {
     log.debug("Getting activity with ID: {}", id);
-    Activity activity = activityService.getActivityById(id);
+    String currentUsername = authentication.getName();
+    ActivityDTO activity = activityService.getActivityById(id, currentUsername);
     return ResponseEntity.ok(activity);
   }
+
 
   /**
    * Updates an existing activity. Only authenticated users can update activities. The current user
@@ -68,18 +72,18 @@ public class ActivityController {
    *     catch? or 403 Forbidden if the user is not authorized.
    */
   @PutMapping("/{id}")
-  public ResponseEntity<Activity> updateActivity(
-      @PathVariable Long id, @RequestBody Activity activity, Authentication authentication) {
+  public ResponseEntity<ActivityDTO> updateActivity(
+          @PathVariable Long id, @RequestBody ActivityDTO activity, Authentication authentication) {
     log.debug("Updating activity with ID: {}", id);
     String username = authentication.getName();
-    Activity updatedActivity = activityService.updateActivity(id, activity, username);
+    ActivityDTO updatedActivity = activityService.updateActivity(id, activity, username);
     return ResponseEntity.ok(updatedActivity);
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteActivity(@PathVariable Long id, Authentication authentication) {
     log.debug("Deleting activity with ID: {}", id);
-    String username = authentication.getName(); // TODO Variable sparen, lohnt sich das?
+    String username = authentication.getName();
     activityService.deleteActivity(id, username);
     return ResponseEntity.ok().build();
   }
@@ -96,17 +100,17 @@ public class ActivityController {
    *     catch? or 403 Forbidden if the user is not authorized.
    */
   @GetMapping("/creator")
-  public ResponseEntity<List<Activity>> getActivity(Authentication authentication) {
+  public ResponseEntity<List<ActivityDTO>> getActivityByCreator(Authentication authentication) {
     log.debug("Getting activities created by the authenticated user");
     String username = authentication.getName();
-    List<Activity> activities = activityService.getActivityByCreatorName(username);
+    List<ActivityDTO> activities = activityService.getActivityByCreatorName(username);
 
     if (activities.isEmpty()) {
       return ResponseEntity.noContent().build();
     }
 
     return ResponseEntity.ok()
-        .header("X-Total-Count", String.valueOf(activities.size()))
-        .body(activities);
+            .header("X-Total-Count", String.valueOf(activities.size()))
+            .body(activities);
   }
 }
