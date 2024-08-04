@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Clock, Users, Star, DollarSign, UserPlus, UserMinus, Edit, Trash } from 'lucide-react';
+import { MapPin, Clock, Users, Star, DollarSign, UserPlus, UserMinus, Edit, Trash, Crown } from 'lucide-react';
 import { Activity } from '../services/api';
+
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css';
 
 interface ActivityCardProps {
   activity: Activity;
@@ -21,6 +24,14 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticipate, on
   };
 
   return (
+    <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 relative">
+      {activity.currentUserCreator && (
+        <Tippy content="Du bist der Ersteller dieser Aktivität">
+          <div className="absolute top-2 right-2 bg-claude-yellow text-white p-1 rounded-full cursor-pointer">
+            <Crown size={16} />
+          </div>
+        </Tippy>
+      )}
     <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
       <Link to={`/activity/${activity.id}`}>
         <img src={activity.imagePath} alt={activity.name} className="w-full h-48 object-cover rounded-md mb-4" />
@@ -88,6 +99,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticipate, on
           <Trash className="w-5 h-5" />
         </button>
       </div>
+    </div>
     </div>
   );
 };

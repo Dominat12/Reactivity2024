@@ -19,6 +19,7 @@ export interface Activity {
   minParticipants: number;
   maxParticipants: number;
   imagePath: string;
+  currentUserCreator: boolean;
 }
 
 // In api.ts

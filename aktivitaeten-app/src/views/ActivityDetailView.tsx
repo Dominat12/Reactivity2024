@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getActivity, updateActivity, Activity } from '../services/api';
-import { MapPin, Clock, Users, Star, DollarSign, Calendar, Thermometer, ArrowLeft } from 'lucide-react';
+import { MapPin, Clock, Users, Star, DollarSign, Calendar, Thermometer, ArrowLeft, Crown } from 'lucide-react';
+
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css';
 
 const ActivityDetailView: React.FC = () => {
   const [activity, setActivity] = useState<Activity | null>(null);
@@ -70,6 +73,13 @@ const ActivityDetailView: React.FC = () => {
           >
             <ArrowLeft className="w-6 h-6 text-gray-600" />
           </button>
+          {activity.currentUserCreator && (
+            <Tippy content="Du bist der Ersteller dieser Aktivität">
+              <div className="absolute top-4 right-4 bg-claude-yellow text-white p-2 rounded-full cursor-pointer">
+                <Crown size={24} />
+              </div>
+            </Tippy>
+          )}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
             <h1 className="text-4xl font-bold text-white mb-2">{activity.name}</h1>
             <div className="flex items-center text-white">
@@ -85,7 +95,7 @@ const ActivityDetailView: React.FC = () => {
               <Clock className="w-6 h-6 text-blue-500 mr-2" />
               <div>
                 <p className="text-sm text-gray-500">Dauer</p>
-                <p className="font-semibold">{activity.startTime}</p>
+                <p className="font-semibold">{new Date(activity.startTime).toLocaleString()}</p>
               </div>
             </div>
             <div className="flex items-center">
