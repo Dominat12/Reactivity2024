@@ -97,6 +97,23 @@ public class ActivityService {
         }
     }
 
+    public ActivityDTO removeParticipant(Long activityId, String creatorUsername, String participantUsername) {
+        Activity activity = getActivityById(activityId);
+        User creator = userService.getUserByName(creatorUsername);
+        User participant = userService.getUserByName(participantUsername);
+
+        if (!activity.isCreatedBy(creator)) {
+            throw new UnauthorizedAccessException("Only the creator can remove participants.");
+        }
+
+        if (activity.removeParticipant(participant)) {
+            activity = activityRepository.save(activity);
+            return activityMapper.toDTO(activity, creatorUsername);
+        } else {
+            throw new IllegalStateException("User is not a participant of this activity.");
+        }
+    }
+
 
     //// UTILITY
     public ActivityDTO getActivityById(Long id, String currentUsername) {
