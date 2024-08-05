@@ -11,6 +11,7 @@ const ActivityDetailView: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const isActivityFull = activity ? activity.participants.length >= activity.maxParticipants : false;
 
   useEffect(() => {
     if (id) {
@@ -51,14 +52,13 @@ const ActivityDetailView: React.FC = () => {
   };
 
   const handleParticipation = async () => {
-    if (activity) {
+    if (activity && !isActivityFull) {
       try {
         if (activity.currentUserParticipant) {
           await leaveActivity(activity.id);
         } else {
           await joinActivity(activity.id);
         }
-        // Aktivität nach der Teilnahme/Abmeldung neu laden
         await fetchActivity(activity.id);
       } catch (error) {
         console.error('Fehler bei der Teilnahme/Abmeldung:', error);
@@ -90,7 +90,7 @@ const ActivityDetailView: React.FC = () => {
           >
             <ArrowLeft className="w-6 h-6 text-gray-600" />
           </button>
-          {!activity.currentUserParticipant && (
+          {activity.currentUserCreator && (
             <div className="absolute top-4 right-4 flex space-x-2">
               <Tippy content="Du bist der Ersteller dieser Aktivität">
                 <div className="bg-claude-yellow text-white p-2 rounded-full cursor-pointer">
@@ -158,7 +158,7 @@ const ActivityDetailView: React.FC = () => {
           </div>
           
           <div className="mb-6">
-            <h2 className="text-2xl font-semibold mb-2">Teilnehmer</h2>
+          <h2 className="text-2xl font-semibold mb-2">Teilnehmer</h2>
             <div className="flex items-center justify-between mb-2">
               <span className="text-gray-700">{activity.participants.length}/{activity.maxParticipants}</span>
               <div className="w-3/4 bg-gray-200 rounded-full h-2.5">
@@ -180,26 +180,25 @@ const ActivityDetailView: React.FC = () => {
             )}
           </div>
           
-          {!activity.currentUserParticipant && (
+          {activity.currentUserParticipant ? (
             <button 
-              className={`w-full py-3 px-4 rounded-lg text-white font-semibold transition-colors duration-300 flex items-center justify-center ${
-                activity.currentUserParticipant
-                  ? 'bg-red-500 hover:bg-red-600'
-                  : 'bg-green-500 hover:bg-green-600'
-              }`}
+              className="w-full py-3 px-4 rounded-lg text-white font-semibold bg-red-500 hover:bg-red-600 transition-colors duration-300 flex items-center justify-center"
               onClick={handleParticipation}
             >
-              {activity.currentUserParticipant ? (
-                <>
-                  <UserMinus className="w-5 h-5 mr-2" />
-                  Teilnahme stornieren
-                </>
-              ) : (
-                <>
-                  <UserPlus className="w-5 h-5 mr-2" />
-                  Jetzt teilnehmen
-                </>
-              )}
+              <UserMinus className="w-5 h-5 mr-2" />
+              Teilnahme stornieren
+            </button>
+          ) : isActivityFull ? (
+            <div className="text-claude-subtext mt-4 text-center p-3 bg-gray-100 rounded-lg">
+              Diese Aktivität ist leider bereits voll. Sie können sich nicht mehr anmelden.
+            </div>
+          ) : (
+            <button 
+              className="w-full py-3 px-4 rounded-lg text-white font-semibold bg-green-500 hover:bg-green-600 transition-colors duration-300 flex items-center justify-center"
+              onClick={handleParticipation}
+            >
+              <UserPlus className="w-5 h-5 mr-2" />
+              Jetzt teilnehmen
             </button>
           )}
         </div>

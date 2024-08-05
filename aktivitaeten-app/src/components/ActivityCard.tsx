@@ -13,6 +13,8 @@ interface ActivityCardProps {
 }
 
 const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticipate, onEdit, onDelete }) => {
+  const isActivityFull = activity.participants.length >= activity.maxParticipants;
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 relative">
       {activity.currentUserCreator && (
@@ -45,14 +47,25 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticipate, on
             <span>{activity.rating}</span>
           </div>
         </div>
+
+        
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <Users className="w-4 h-4 mr-1" />
             <span>{activity.minParticipants} - {activity.maxParticipants} Teilnehmer</span>
           </div>
         </div>
+
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Users className="w-4 h-4 mr-1" />
+            <span>{activity.participants.length} / {activity.maxParticipants} Teilnehmer</span>
+          </div>
+        </div>
       </div>
       <div className="flex justify-between items-center mt-4">
+
         {activity.currentUserCreator ? (
           <>
             <button
@@ -68,14 +81,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticipate, on
               <Trash className="w-5 h-5" />
             </button>
           </>
-        ) : onParticipate ? (
-          <button
-            className="flex items-center text-claude-green hover:text-[#34D399] transition-colors duration-300"
-            onClick={() => onParticipate(activity.id)}
-          >
-            <UserPlus className="w-5 h-5 mr-1" />
-            Teilnehmen
-          </button>
+        ) : isActivityFull ? (
+          <span className="text-claude-subtext">Aktivität voll</span>
         ) : null}
       </div>
     </div>
