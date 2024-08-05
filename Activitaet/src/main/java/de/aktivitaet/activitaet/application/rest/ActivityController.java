@@ -113,4 +113,20 @@ public class ActivityController {
             .header("X-Total-Count", String.valueOf(activities.size()))
             .body(activities);
   }
+
+  @PostMapping("/{id}/join")
+  public ResponseEntity<ActivityDTO> joinActivity(@PathVariable Long id, Authentication authentication) {
+    log.debug("User joining activity with ID: {}", id);
+    String username = authentication.getName();
+    ActivityDTO updatedActivity = activityService.joinActivity(id, username);
+    return ResponseEntity.ok(updatedActivity);
+  }
+
+  @PostMapping("/{id}/leave")
+  public ResponseEntity<ActivityDTO> leaveActivity(@PathVariable Long id, Authentication authentication) {
+    log.debug("User leaving activity with ID: {}", id);
+    String username = authentication.getName();
+    ActivityDTO updatedActivity = activityService.leaveActivity(id, username);
+    return ResponseEntity.ok(updatedActivity);
+  }
 }

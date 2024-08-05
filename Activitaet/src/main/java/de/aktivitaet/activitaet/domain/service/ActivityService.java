@@ -69,6 +69,34 @@ public class ActivityService {
         activityRepository.deleteById(id);
     }
 
+    public ActivityDTO joinActivity(Long activityId, String username) {
+        Activity activity = getActivityById(activityId);
+        User user = userService.getUserByName(username);
+
+        if (activity.isCreatedBy(user)) {
+            throw new UnauthorizedAccessException("The creator cannot join their own activity.");
+        }
+
+        if (activity.addParticipant(user)) {
+            activity = activityRepository.save(activity);
+            return activityMapper.toDTO(activity, username);
+        } else {
+            throw new IllegalStateException("User is already a participant.");
+        }
+    }
+
+    public ActivityDTO leaveActivity(Long activityId, String username) {
+        Activity activity = getActivityById(activityId);
+        User user = userService.getUserByName(username);
+
+        if (activity.removeParticipant(user)) {
+            activity = activityRepository.save(activity);
+            return activityMapper.toDTO(activity, username);
+        } else {
+            throw new IllegalStateException("User is not a participant of this activity.");
+        }
+    }
+
 
     //// UTILITY
     public ActivityDTO getActivityById(Long id, String currentUsername) {

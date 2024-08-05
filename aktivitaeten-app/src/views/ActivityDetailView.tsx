@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getActivity, updateActivity, deleteActivity, participateInActivity, Activity } from '../services/api';
+import { getActivity, updateActivity, deleteActivity, joinActivity, leaveActivity, Activity } from '../services/api';
 import { MapPin, Clock, Users, Star, DollarSign, Calendar, ArrowLeft, Crown, Edit, Trash, UserPlus, UserMinus } from 'lucide-react';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
@@ -9,7 +9,6 @@ const ActivityDetailView: React.FC = () => {
   const [activity, setActivity] = useState<Activity | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isParticipating, setIsParticipating] = useState(false);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -25,8 +24,6 @@ const ActivityDetailView: React.FC = () => {
       setError(null);
       const response = await getActivity(activityId);
       setActivity(response.data);
-      // Here you would typically check if the current user is participating
-      // setIsParticipating(checkIfUserIsParticipating(response.data));
     } catch (error) {
       console.error('Fehler beim Laden der Aktivität:', error);
       setError('Aktivität konnte nicht geladen werden. Bitte versuchen Sie es später erneut.');
@@ -54,11 +51,15 @@ const ActivityDetailView: React.FC = () => {
   };
 
   const handleParticipation = async () => {
-    if (activity && !activity.currentUserCreator) {
+    if (activity) {
       try {
-        await participateInActivity(activity.id);
-        setIsParticipating(!isParticipating);
-        // Hier würden Sie normalerweise die Aktivität neu laden oder den Teilnehmerstatus aktualisieren
+        if (activity.currentUserParticipant) {
+          await leaveActivity(activity.id);
+        } else {
+          await joinActivity(activity.id);
+        }
+        // Aktivität nach der Teilnahme/Abmeldung neu laden
+        await fetchActivity(activity.id);
       } catch (error) {
         console.error('Fehler bei der Teilnahme/Abmeldung:', error);
         setError('Aktion konnte nicht durchgeführt werden. Bitte versuchen Sie es später erneut.');
@@ -89,7 +90,7 @@ const ActivityDetailView: React.FC = () => {
           >
             <ArrowLeft className="w-6 h-6 text-gray-600" />
           </button>
-          {activity.currentUserCreator && (
+          {!activity.currentUserParticipant && (
             <div className="absolute top-4 right-4 flex space-x-2">
               <Tippy content="Du bist der Ersteller dieser Aktivität">
                 <div className="bg-claude-yellow text-white p-2 rounded-full cursor-pointer">
@@ -118,7 +119,7 @@ const ActivityDetailView: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="p-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="flex items-center">
@@ -158,31 +159,37 @@ const ActivityDetailView: React.FC = () => {
           
           <div className="mb-6">
             <h2 className="text-2xl font-semibold mb-2">Teilnehmer</h2>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-700">3/{activity.maxParticipants}</span>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-gray-700">{activity.participants.length}/{activity.maxParticipants}</span>
               <div className="w-3/4 bg-gray-200 rounded-full h-2.5">
                 <div 
                   className="bg-blue-600 h-2.5 rounded-full" 
-                  style={{width: `${(3 / activity.maxParticipants) * 100}%`}}
+                  style={{width: `${(activity.participants.length / activity.maxParticipants) * 100}%`}}
                 ></div>
               </div>
             </div>
+            {!activity.currentUserParticipant && (
+              <div className="mt-4">
+                <h3 className="text-lg font-semibold mb-2">Teilnehmerliste:</h3>
+                <ul className="list-disc list-inside">
+                  {activity.participants.map((participant) => (
+                    <li key={participant.id}>{participant.username}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
           
-          {activity.currentUserCreator ? (
-            <div className="text-claude-subtext mt-4">
-              Dies ist deine eigene Aktivität. Du kannst nicht als Teilnehmer beitreten.
-            </div>
-          ) : (
+          {!activity.currentUserParticipant && (
             <button 
               className={`w-full py-3 px-4 rounded-lg text-white font-semibold transition-colors duration-300 flex items-center justify-center ${
-                isParticipating
+                activity.currentUserParticipant
                   ? 'bg-red-500 hover:bg-red-600'
                   : 'bg-green-500 hover:bg-green-600'
               }`}
               onClick={handleParticipation}
             >
-              {isParticipating ? (
+              {activity.currentUserParticipant ? (
                 <>
                   <UserMinus className="w-5 h-5 mr-2" />
                   Teilnahme stornieren

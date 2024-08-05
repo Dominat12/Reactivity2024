@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -31,6 +33,14 @@ public class Activity {
     @ManyToOne
     @JoinColumn(name = "creator_id")
     private User creator;
+
+    @ManyToMany
+    @JoinTable(
+            name = "activity_participants",
+            joinColumns = @JoinColumn(name = "activity_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> participants = new HashSet<>();
 
     // Konstruktor
     public Activity() {
@@ -72,4 +82,15 @@ public class Activity {
         return this.creator != null && this.creator.equals(user);
     }
 
+    public boolean addParticipant(User user) {
+        return participants.add(user);
+    }
+
+    public boolean removeParticipant(User user) {
+        return participants.remove(user);
+    }
+
+    public boolean isParticipant(User user) {
+        return participants.contains(user);
+    }
 }

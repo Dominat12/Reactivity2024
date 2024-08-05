@@ -3,14 +3,11 @@ package de.aktivitaet.activitaet.application.dto;
 import de.aktivitaet.activitaet.domain.model.User;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Builder
-@Getter
-@Setter
+@Data
 public class ActivityDTO {
     private Long id;
     private String name;
@@ -25,8 +22,10 @@ public class ActivityDTO {
     private int maxParticipants;
     private String imagePath;
     private UserDTO creator;
+    private Set<UserDTO> participants;
 
     private boolean isCurrentUserCreator;
+    private boolean isCurrentUserParticipant;
 
 
     public boolean isCreatedBy(User user) {
