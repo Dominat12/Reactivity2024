@@ -21,6 +21,7 @@ const NavigationBar: React.FC = () => {
               <Link to="/" className="text-white mr-4 hover:underline">Aktivitäten</Link>
               <Link to="/my-activities" className="text-white mr-4 hover:underline">Meine Aktivitäten</Link>
               <Link to="/create" className="text-white mr-4 hover:underline">Neue Aktivität</Link>
+              <Link to="/profile" className="text-white mr-4 hover:underline">Mein Profil</Link>
               <button onClick={handleLogout} className="text-white hover:underline">Logout</button>
             </>
           ) : (

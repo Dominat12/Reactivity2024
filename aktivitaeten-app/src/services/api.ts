@@ -44,6 +44,29 @@ export interface ActivityInput {
     imagePath?: string; // Optional field
   }
 
+  
+export interface UserProfile {
+  username: string;
+  firstName: string;
+  lastName: string;
+  alias: string;
+  birthDate: string;
+  phoneNumber: string;
+  email: string;
+  gender: 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
+  role: string;
+}
+
+export interface UserProfileUpdate {
+  firstName: string;
+  lastName: string;
+  alias: string;
+  birthDate: string;
+  phoneNumber: string;
+  email: string;
+  gender: 'MALE' | 'FEMALE' | 'OTHER'| 'PREFER_NOT_TO_SAY';
+}
+
 //Get Activities
 export const getActivities = () => api.get<Activity[]>('/activities');
 export const getActivity = (id: number) => api.get<Activity>(`/activities/${id}`);
@@ -60,6 +83,9 @@ export const getUserActivities = () => api.get<Activity[]>('/activities/creator'
 export const joinActivity = (id: number) => api.post(`/activities/${id}/join`);
 export const leaveActivity = (id: number) => api.post(`/activities/${id}/leave`);
 
+// User Profile
+export const getUserProfile = () => api.get<UserProfile>('/users/profile');
+export const updateUserProfile = (profile: UserProfileUpdate) => api.put<UserProfile>('/users/profile', profile);
 
 
 export default api;
