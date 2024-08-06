@@ -82,6 +82,9 @@ export const getUserActivities = () => api.get<Activity[]>('/activities/creator'
 //Participate
 export const joinActivity = (id: number) => api.post(`/activities/${id}/join`);
 export const leaveActivity = (id: number) => api.post(`/activities/${id}/leave`);
+export const removeParticipant = (activityId: number, participantUsername: string) => 
+  api.delete(`/activities/${activityId}/participants/${participantUsername}`);
+
 
 // User Profile
 export const getUserProfile = () => api.get<UserProfile>('/users/profile');

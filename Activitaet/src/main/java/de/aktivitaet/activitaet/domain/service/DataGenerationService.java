@@ -7,6 +7,7 @@ import de.aktivitaet.activitaet.domain.model.User;
 import de.aktivitaet.activitaet.domain.repository.ActivityRepository;
 import de.aktivitaet.activitaet.domain.repository.UserRepository;
 import de.aktivitaet.activitaet.infrastructure.mapper.UserMapper;
+import jakarta.transaction.Transactional;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,8 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Data
@@ -29,6 +32,8 @@ public class DataGenerationService {
     private final UserMapper userMapper;
     private final ActivityRepository activityRepository;
     private final ActivityService activityService;
+
+    private final Random RANDOM_SEED = new Random(42);
 
     private final List<String> activityTypes =
             Arrays.asList(
@@ -57,51 +62,134 @@ public class DataGenerationService {
                     "Coworking Space");
 
     @PostConstruct
+    @Transactional
     public void generateSampleData() {
-        User ghana = initUser();
-        UserDTO ghanaDTO = userMapper.toDTO(ghana);
+        User ghana = initSpecialUser();
         log.info("Generating activity sample data");
 
+        List<Activity> activities = generateActivities(ghana);
+        List<User> users = generateRandomUsers();
+        assignUsersToActivities(users, activities);
+
+        // Generate additional events for user "user"
+        User regularUser = userService.getUserByName("user");
+        List<Activity> userActivities = generateUserActivities(regularUser, 3);
+        assignUsersToActivities(users, userActivities);
+    }
+
+    private List<Activity> generateActivities(User creator) {
         if (activityRepository.count() == 0) {
-            Random random = new Random();
-            for (int i = 0; i < 10; i++) {
-                String name = activityTypes.get(random.nextInt(activityTypes.size()));
-                String location = locations.get(random.nextInt(locations.size()));
-                LocalDateTime startTime =
-                        LocalDateTime.now().plusDays(random.nextInt(30)).plusHours(random.nextInt(24));
-                LocalDateTime endTime = startTime.plusHours(random.nextInt(5) + 1);
-                double minPrice = random.nextDouble() * 50;
-                double maxPrice = minPrice + (random.nextDouble() * 50);
-                int minParticipants = random.nextInt(5) + 1;
-                int maxParticipants = minParticipants + random.nextInt(20);
+            return IntStream.range(0, 10)
+                    .mapToObj(i -> createActivity(creator))
+                    .collect(Collectors.toList());
+        }
+        return activityRepository.findAll();
+    }
 
-                ActivityDTO activity =
-                        ActivityDTO.builder()
-                                .creator(ghanaDTO)
-                                .name(name)
-                                .description(
-                                        String.format(
-                                                "Tauchen Sie ein in die spannende Welt des %s und erleben Sie Momente voller Abenteuer, "
-                                                        + "Herausforderung und persönlichem Wachstum. Diese faszinierende Aktivität bietet Ihnen die perfekte Gelegenheit, "
-                                                        + "Ihre Grenzen zu erweitern, neue Fähigkeiten zu entwickeln und unvergessliche Erinnerungen zu schaffen. ",
-                                                name))
-                                .rating(random.nextInt(5) + 1)
-                                .location(location)
-                                .startTime(startTime)
-                                .endTime(endTime)
-                                .minPrice(minPrice)
-                                .maxPrice(maxPrice)
-                                .minParticipants(minParticipants)
-                                .maxParticipants(maxParticipants)
-                                .imagePath("/images/default-activity.jpg")
-                                .build();
+    private List<Activity> generateUserActivities(User creator, int count) {
+        log.info("Generating {} activities for user {}", count, creator.getUsername());
+        return IntStream.range(0, count)
+                .mapToObj(i -> createActivity(creator))
+                .collect(Collectors.toList());
+    }
 
-                activityService.createActivity(activity, ghana.getUsername());
+    private Activity createActivity(User creator) {
+        String name = activityTypes.get(RANDOM_SEED.nextInt(activityTypes.size()));
+        String location = locations.get(RANDOM_SEED.nextInt(locations.size()));
+        LocalDateTime startTime = LocalDateTime.now().plusDays(RANDOM_SEED.nextInt(30)).plusHours(RANDOM_SEED.nextInt(24));
+        LocalDateTime endTime = startTime.plusHours(RANDOM_SEED.nextInt(5) + 1);
+        double minPrice = RANDOM_SEED.nextDouble() * 50;
+        double maxPrice = minPrice + (RANDOM_SEED.nextDouble() * 50);
+        int minParticipants = RANDOM_SEED.nextInt(5) + 1;
+        int maxParticipants = minParticipants + RANDOM_SEED.nextInt(20);
+
+        Activity activity = new Activity();
+        activity.setCreator(creator);
+        activity.setName(name);
+        activity.setDescription(String.format("Tauchen Sie ein in die spannende Welt des %s und erleben Sie Momente voller Abenteuer, "
+                + "Herausforderung und persönlichem Wachstum. Diese faszinierende Aktivität bietet Ihnen die perfekte Gelegenheit, "
+                + "Ihre Grenzen zu erweitern, neue Fähigkeiten zu entwickeln und unvergessliche Erinnerungen zu schaffen. ", name));
+        activity.setRating(RANDOM_SEED.nextInt(5) + 1);
+        activity.setLocation(location);
+        activity.setStartTime(startTime);
+        activity.setEndTime(endTime);
+        activity.setMinPrice(minPrice);
+        activity.setMaxPrice(maxPrice);
+        activity.setMinParticipants(minParticipants);
+        activity.setMaxParticipants(maxParticipants);
+        activity.setImagePath("/images/default-activity.jpg");
+
+        return activityRepository.save(activity);
+    }
+
+    private List<User> generateRandomUsers() {
+        if (userRepository.count() <= 5) { // Assuming we already have some users (admin, ghana, etc.)
+            return IntStream.range(0, 20)
+                    .mapToObj(i -> createRandomUser(i))
+                    .collect(Collectors.toList());
+        }
+        return userRepository.findAll();
+    }
+
+    private User createRandomUser(int index) {
+        String username = "user" + (index + 1);
+        String password = "password" + (index + 1);
+        String email = username + "@example.com";
+        String firstName = getRandomName();
+        String lastName = getRandomName();
+        LocalDate birthDate = LocalDate.now().minusYears(20 + RANDOM_SEED.nextInt(40));
+        String phoneNumber = "1234" + String.format("%06d", RANDOM_SEED.nextInt(1000000));
+        User.Gender gender = User.Gender.values()[RANDOM_SEED.nextInt(User.Gender.values().length)];
+        User.Role role = RANDOM_SEED.nextDouble() < 0.1 ? User.Role.ADMIN : User.Role.USER;
+
+        User user = User.builder()
+                .username(username)
+                .password(password)
+                .email(email)
+                .firstName(firstName)
+                .lastName(lastName)
+                .birthDate(birthDate)
+                .phoneNumber(phoneNumber)
+                .gender(gender)
+                .role(role)
+                .build();
+
+        return userService.createUser(user);
+    }
+
+    private String getRandomName() {
+        String[] names = {"John", "Jane", "Alice", "Bob", "Charlie", "Diana", "Edward", "Fiona", "George", "Hannah"};
+        return names[RANDOM_SEED.nextInt(names.length)];
+    }
+
+    private void assignUsersToActivities(List<User> users, List<Activity> activities) {
+        log.info("Assigning users to activities");
+        for (int i = 0; i < users.size(); i++) {
+            User user = users.get(i);
+            for (int j = 0; j < activities.size(); j++) {
+                if ((i + j) % 3 == 0) { // This ensures a deterministic but varied participation pattern
+                    Activity activity = activities.get(j);
+                    if (!activity.isCreatedBy(user) && !activity.isParticipant(user)) {
+                        log.info("Adding user {} with id {} to activity {}", user.getUsername(), user.getId(), activity.getName());
+                        activity.addParticipant(user);
+                    }
+                }
             }
+        }
+
+        for (Activity activity : activities) {
+            activityRepository.save(activity);
         }
     }
 
-    public User initUser() {
+
+
+
+    /**
+     * Special users
+     * @return
+     */
+    public User initSpecialUser() {
         if (userRepository.count() == 0) {
             log.info("Generating user sample data");
             User user = User.builder()

@@ -34,7 +34,7 @@ public class Activity {
     @JoinColumn(name = "creator_id")
     private User creator;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "activity_participants",
             joinColumns = @JoinColumn(name = "activity_id"),
