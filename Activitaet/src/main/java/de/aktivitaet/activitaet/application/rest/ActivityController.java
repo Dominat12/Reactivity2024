@@ -147,15 +147,15 @@ public class ActivityController {
   }
 
 
-  @DeleteMapping("/{id}/participants/{participantUsername}")
+  @DeleteMapping("/{activityId}/participants/{participantUsername}")
   public ResponseEntity<ActivityDTO> removeParticipant(
-          @PathVariable Long id,
+          @PathVariable Long activityId,
           @PathVariable String participantUsername,
           Authentication authentication) {
-    log.debug("Removing participant {} from activity with ID: {}", participantUsername, id);
+    log.debug("Removing participant {} from activity with ID: {}", participantUsername, activityId);
     String creatorUsername = authentication.getName();
-    ActivityDTO updatedActivity = activityService.removeParticipant(id, creatorUsername, participantUsername);
+    ActivityDTO updatedActivity = userActivityService.removeParticipantFromActivity(activityId, participantUsername, creatorUsername);
     return ResponseEntity.ok(updatedActivity);
   }
-  
+
 }

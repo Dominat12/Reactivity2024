@@ -43,14 +43,15 @@ public class UserActivityService {
     }
 
     @Transactional
-    public void removeParticipantFromActivity(Long activityId, String username) {
+    public ActivityDTO removeParticipantFromActivity(Long activityId, String username, String creatorUsername) {
         Activity activity = activityRepository.findById(activityId)
                 .orElseThrow(() -> new ResourceNotFoundException("Activity not found: " + activityId));
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
 
         if (activity.getParticipants().remove(user)) {
-            activityRepository.save(activity);
+            activity = activityRepository.save(activity);
         }
+        return activityMapper.toDTO(activity, creatorUsername);
     }
 }
