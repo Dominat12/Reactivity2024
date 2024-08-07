@@ -93,13 +93,30 @@ public class DataGenerationService {
                 .collect(Collectors.toList());
     }
 
+
     private Activity createActivity(User creator) {
         String name = activityTypes.get(RANDOM_SEED.nextInt(activityTypes.size()));
         String location = locations.get(RANDOM_SEED.nextInt(locations.size()));
-        LocalDateTime startTime = LocalDateTime.now().plusDays(RANDOM_SEED.nextInt(30)).plusHours(RANDOM_SEED.nextInt(24));
-        LocalDateTime endTime = startTime.plusHours(RANDOM_SEED.nextInt(5) + 1);
-        double minPrice = RANDOM_SEED.nextDouble() * 50;
-        double maxPrice = minPrice + (RANDOM_SEED.nextDouble() * 50);
+
+        // Generate start time in 30-minute intervals
+        LocalDateTime now = LocalDateTime.now();
+        int daysToAdd = RANDOM_SEED.nextInt(30);
+        int hoursToAdd = RANDOM_SEED.nextInt(48); // 48 half-hours in a day
+        LocalDateTime startTime = now.plusDays(daysToAdd)
+                .withHour(0)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0)
+                .plusMinutes(30 * hoursToAdd);
+
+        // Ensure end time is also in 30-minute intervals
+        int durationInHalfHours = RANDOM_SEED.nextInt(10) + 2; // 1 to 5 hours, in half-hour increments
+        LocalDateTime endTime = startTime.plusMinutes(30 * durationInHalfHours);
+
+        // Generate whole Euro amounts for prices
+        int minPrice = RANDOM_SEED.nextInt(51); // 0 to 50 euros
+        int maxPrice = minPrice + RANDOM_SEED.nextInt(51); // minPrice to minPrice + 50 euros
+
         int minParticipants = RANDOM_SEED.nextInt(5) + 1;
         int maxParticipants = minParticipants + RANDOM_SEED.nextInt(20);
 

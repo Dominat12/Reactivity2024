@@ -67,6 +67,14 @@ export interface UserProfileUpdate {
   gender: 'MALE' | 'FEMALE' | 'OTHER'| 'PREFER_NOT_TO_SAY';
 }
 
+export interface ActivityPage {
+  content: Activity[];
+  totalPages: number;
+  totalElements: number;
+  size: number;
+  number: number;
+}
+
 //Get Activities
 export const getActivities = () => api.get<Activity[]>('/activities');
 export const getActivity = (id: number) => api.get<Activity>(`/activities/${id}`);
@@ -82,8 +90,8 @@ export const getUserActivities = () => api.get<Activity[]>('/activities/creator'
 //Participate
 export const joinActivity = (id: number) => api.post(`/activities/${id}/join`);
 export const leaveActivity = (id: number) => api.post(`/activities/${id}/leave`);
-export const removeParticipant = (activityId: number, participantUsername: string) => 
-  api.delete(`/activities/${activityId}/participants/${participantUsername}`);
+export const removeParticipant = (activityId: number, participantUsername: string) =>   api.delete(`/activities/${activityId}/participants/${participantUsername}`);
+export const getParticipatingActivities = (page = 0, size = 10) =>   api.get<ActivityPage>(`/activities/participating?page=${page}&size=${size}`);
 
 
 // User Profile

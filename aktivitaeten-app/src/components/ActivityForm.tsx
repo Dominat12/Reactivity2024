@@ -3,12 +3,11 @@ import { Activity, ActivityInput } from '../services/api';
 
 interface ActivityFormProps {
   onAddActivity?: (activity: ActivityInput) => void;
-  onUpdateActivity: (activity: Activity) => void;
+  onUpdateActivity: (activity: ActivityInput) => void;
   editingActivity: Activity | null;
 }
 
 const ActivityForm: React.FC<ActivityFormProps> = ({ onAddActivity, onUpdateActivity, editingActivity }) => {
-
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [rating, setRating] = useState(1);
@@ -70,11 +69,10 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onAddActivity, onUpdateActi
     };
 
     if (editingActivity) {
-      onUpdateActivity({ ...activityData, id: editingActivity.id } as Activity);
+      onUpdateActivity(activityData);
     } else if (onAddActivity) {
       onAddActivity(activityData);
     }
-    resetForm();
   };
 
   return (

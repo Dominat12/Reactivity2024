@@ -5,6 +5,7 @@ import { MapPin, Clock, Users, Star, DollarSign, Calendar, ArrowLeft, Crown, Edi
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import Toast from '../components/Toast';
+import axios from 'axios';
 
 const ActivityDetailView: React.FC = () => {
   const [activity, setActivity] = useState<Activity | null>(null);
@@ -77,7 +78,15 @@ const ActivityDetailView: React.FC = () => {
         await fetchActivity(activity.id);
       } catch (error) {
         console.error('Fehler beim Entfernen des Teilnehmers:', error);
-        setToast({ message: 'Fehler beim Entfernen des Teilnehmers', type: 'error' });
+        if (axios.isAxiosError(error) && error.response) {
+          if (error.response.status === 404) {
+            setToast({ message: 'Teilnehmer oder Aktivität nicht gefunden', type: 'error' });
+          } else {
+            setToast({ message: `Fehler beim Entfernen des Teilnehmers: ${error.response.data.message || 'Unbekannter Fehler'}`, type: 'error' });
+          }
+        } else {
+          setToast({ message: 'Ein unerwarteter Fehler ist aufgetreten', type: 'error' });
+        }
       }
     }
   };
@@ -173,7 +182,7 @@ const ActivityDetailView: React.FC = () => {
           </div>
           
           <div className="mb-6">
-          <h2 className="text-2xl font-semibold mb-2">Teilnehmer</h2>
+            <h2 className="text-2xl font-semibold mb-2">Teilnehmer</h2>
             <div className="flex items-center justify-between mb-2">
               <span className="text-gray-700">{activity.participants.length}/{activity.maxParticipants}</span>
               <div className="w-3/4 bg-gray-200 rounded-full h-2.5">
@@ -203,7 +212,31 @@ const ActivityDetailView: React.FC = () => {
             </div>
           </div>
           
-          {/* ... (Rest des Codes bleibt unverändert) */}
+          {activity.currentUserParticipant ? (
+            <button 
+              className="w-full py-3 px-4 rounded-lg text-white font-semibold bg-red-500 hover:bg-red-600 transition-colors duration-300 flex items-center justify-center"
+              onClick={handleParticipation}
+            >
+              <UserMinus className="w-5 h-5 mr-2" />
+              Teilnahme stornieren
+            </button>
+          ) : isActivityFull ? (
+            <div className="text-claude-subtext mt-4 text-center p-3 bg-gray-100 rounded-lg">
+              Diese Aktivität ist leider bereits voll. Sie können sich nicht mehr anmelden.
+            </div>
+          )  : activity.currentUserCreator ? (
+            <div className="text-claude-subtext mt-4 text-center p-3 bg-gray-100 rounded-lg">
+              Du bist der Ersteller dieser Aktivität.
+            </div>
+          ) : (
+            <button 
+              className="w-full py-3 px-4 rounded-lg text-white font-semibold bg-green-500 hover:bg-green-600 transition-colors duration-300 flex items-center justify-center"
+              onClick={handleParticipation}
+            >
+              <UserPlus className="w-5 h-5 mr-2" />
+              Jetzt teilnehmen
+            </button>
+          )}
         </div>
       </div>
       {toast && (
