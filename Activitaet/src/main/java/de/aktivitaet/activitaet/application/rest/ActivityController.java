@@ -3,10 +3,13 @@ package de.aktivitaet.activitaet.application.rest;
 import de.aktivitaet.activitaet.application.dto.ActivityDTO;
 import de.aktivitaet.activitaet.domain.model.Activity;
 import de.aktivitaet.activitaet.domain.service.ActivityService;
+import de.aktivitaet.activitaet.domain.service.UserActivityService;
 import de.aktivitaet.activitaet.infrastructure.exception.ResourceNotFoundException;
 import de.aktivitaet.activitaet.infrastructure.exception.UnauthorizedAccessException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +23,7 @@ import java.util.List;
 public class ActivityController {
 
   private final ActivityService activityService;
-
-  //    TODO was macht das -> @CrossOrigin
+  private final UserActivityService userActivityService;
 
   /**
    * Handles the creation of a new activity. Only authenticated users can create activities. Current
@@ -130,6 +132,21 @@ public class ActivityController {
     return ResponseEntity.ok(updatedActivity);
   }
 
+  @GetMapping("/participating")
+  public ResponseEntity<Page<ActivityDTO>> getParticipatingActivities(Authentication authentication, Pageable pageable) {
+    String username = authentication.getName();
+    Page<ActivityDTO> activities = userActivityService.getParticipatingActivities(username, pageable);
+    return ResponseEntity.ok(activities);
+  }
+
+  @PostMapping("/{activityId}/participants")
+  public ResponseEntity<Void> addParticipant(@PathVariable Long activityId, Authentication authentication) {
+    String username = authentication.getName();
+    userActivityService.addParticipantToActivity(activityId, username);
+    return ResponseEntity.ok().build();
+  }
+
+
   @DeleteMapping("/{id}/participants/{participantUsername}")
   public ResponseEntity<ActivityDTO> removeParticipant(
           @PathVariable Long id,
@@ -140,4 +157,5 @@ public class ActivityController {
     ActivityDTO updatedActivity = activityService.removeParticipant(id, creatorUsername, participantUsername);
     return ResponseEntity.ok(updatedActivity);
   }
+  
 }
