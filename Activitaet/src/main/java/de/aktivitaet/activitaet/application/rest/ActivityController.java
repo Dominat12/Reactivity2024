@@ -2,7 +2,9 @@ package de.aktivitaet.activitaet.application.rest;
 
 import de.aktivitaet.activitaet.application.dto.ActivityDTO;
 import de.aktivitaet.activitaet.domain.model.Activity;
+import de.aktivitaet.activitaet.domain.model.Rating;
 import de.aktivitaet.activitaet.domain.service.ActivityService;
+import de.aktivitaet.activitaet.domain.service.RatingService;
 import de.aktivitaet.activitaet.domain.service.UserActivityService;
 import de.aktivitaet.activitaet.infrastructure.exception.ResourceNotFoundException;
 import de.aktivitaet.activitaet.infrastructure.exception.UnauthorizedAccessException;
@@ -24,6 +26,7 @@ public class ActivityController {
 
   private final ActivityService activityService;
   private final UserActivityService userActivityService;
+  private final RatingService ratingService;
 
   /**
    * Handles the creation of a new activity. Only authenticated users can create activities. Current
@@ -116,6 +119,7 @@ public class ActivityController {
             .body(activities);
   }
 
+  // PARTICIPATING ACTIVITY
   @PostMapping("/{id}/join")
   public ResponseEntity<ActivityDTO> joinActivity(@PathVariable Long id, Authentication authentication) {
     log.debug("User joining activity with ID: {}", id);
@@ -156,6 +160,27 @@ public class ActivityController {
     String creatorUsername = authentication.getName();
     ActivityDTO updatedActivity = userActivityService.removeParticipantFromActivity(activityId, participantUsername, creatorUsername);
     return ResponseEntity.ok(updatedActivity);
+  }
+
+// RATE ACTIVITY
+  @PostMapping("/{activityId}/rate")
+  public ResponseEntity<Rating> rateActivity(
+          @PathVariable Long activityId,
+          @RequestParam int score,
+          @RequestParam(required = false) String comment,
+          Authentication authentication) {
+    String username = authentication.getName();
+    Rating rating = ratingService.rateActivity(activityId, username, score, comment);
+    return ResponseEntity.ok(rating);
+  }
+
+  @GetMapping("/{activityId}/rating")
+  public ResponseEntity<Rating> getUserRating(
+          @PathVariable Long activityId,
+          Authentication authentication) {
+    String username = authentication.getName();
+    Rating rating = ratingService.getRating(activityId, username);
+    return ResponseEntity.ok(rating);
   }
 
 }

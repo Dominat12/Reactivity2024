@@ -2,12 +2,14 @@ package de.aktivitaet.activitaet.domain.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+@Builder
 @Data
 @AllArgsConstructor
 @Entity
@@ -41,6 +43,9 @@ public class Activity {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> participants = new HashSet<>();
+
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Rating> ratings = new HashSet<>();
 
     // Konstruktor
     public Activity() {
@@ -92,5 +97,15 @@ public class Activity {
 
     public boolean isParticipant(User user) {
         return participants.contains(user);
+    }
+
+    public double getAverageRating() {
+        if (ratings.isEmpty()) {
+            return 0;
+        }
+        return ratings.stream()
+                .mapToInt(Rating::getScore)
+                .average()
+                .orElse(0);
     }
 }

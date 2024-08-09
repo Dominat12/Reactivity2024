@@ -126,7 +126,6 @@ public class DataGenerationService {
         activity.setDescription(String.format("Tauchen Sie ein in die spannende Welt des %s und erleben Sie Momente voller Abenteuer, "
                 + "Herausforderung und persönlichem Wachstum. Diese faszinierende Aktivität bietet Ihnen die perfekte Gelegenheit, "
                 + "Ihre Grenzen zu erweitern, neue Fähigkeiten zu entwickeln und unvergessliche Erinnerungen zu schaffen. ", name));
-        activity.setRating(RANDOM_SEED.nextInt(5) + 1);
         activity.setLocation(location);
         activity.setStartTime(startTime);
         activity.setEndTime(endTime);
