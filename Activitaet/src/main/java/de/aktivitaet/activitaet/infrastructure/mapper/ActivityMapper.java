@@ -23,7 +23,6 @@ public class ActivityMapper {
                 .id(activity.getId())
                 .name(activity.getName())
                 .description(activity.getDescription())
-                .rating(activity.getRating())
                 .location(activity.getLocation())
                 .startTime(activity.getStartTime())
                 .endTime(activity.getEndTime())
@@ -32,11 +31,13 @@ public class ActivityMapper {
                 .minParticipants(activity.getMinParticipants())
                 .maxParticipants(activity.getMaxParticipants())
                 .imagePath(activity.getImagePath())
+                //calculated values
                 .creator(userMapper.toDTO(activity.getCreator()))
-                .isCurrentUserCreator(activity.getCreator().getUsername().equals(currentUsername))
+                .rating(activity.getAverageRating())
                 .participants(activity.getParticipants().stream()
                         .map(userMapper::toDTO)
                         .collect(Collectors.toSet()))
+                .isCurrentUserCreator(activity.getCreator().getUsername().equals(currentUsername))
                 .isCurrentUserParticipant(activity.getParticipants().stream()
                         .anyMatch(user -> user.getUsername().equals(currentUsername)))
                 .build();
@@ -51,7 +52,6 @@ public class ActivityMapper {
         activity.setId(dto.getId());
         activity.setName(dto.getName());
         activity.setDescription(dto.getDescription());
-        activity.setRating(dto.getRating());
         activity.setLocation(dto.getLocation());
         activity.setStartTime(dto.getStartTime());
         activity.setEndTime(dto.getEndTime());
@@ -60,8 +60,6 @@ public class ActivityMapper {
         activity.setMinParticipants(dto.getMinParticipants());
         activity.setMaxParticipants(dto.getMaxParticipants());
         activity.setImagePath(dto.getImagePath());
-        // Beachten Sie, dass wir den Creator hier nicht setzen, da dies normalerweise
-        // vom Service gehandhabt wird
 
         return activity;
     }
@@ -74,7 +72,6 @@ public class ActivityMapper {
         // Aktualisieren Sie nur die Felder, die im DTO gesetzt sind
         if (dto.getName() != null) activity.setName(dto.getName());
         if (dto.getDescription() != null) activity.setDescription(dto.getDescription());
-        if (dto.getRating() != 0) activity.setRating(dto.getRating());
         if (dto.getLocation() != null) activity.setLocation(dto.getLocation());
         if (dto.getStartTime() != null) activity.setStartTime(dto.getStartTime());
         if (dto.getEndTime() != null) activity.setEndTime(dto.getEndTime());

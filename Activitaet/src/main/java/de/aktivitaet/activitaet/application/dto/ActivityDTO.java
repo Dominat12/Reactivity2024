@@ -1,6 +1,5 @@
 package de.aktivitaet.activitaet.application.dto;
 
-import de.aktivitaet.activitaet.domain.model.User;
 import lombok.Builder;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -12,7 +11,7 @@ public class ActivityDTO {
     private Long id;
     private String name;
     private String description;
-    private int rating;
+    private double rating;
     private String location;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -27,12 +26,4 @@ public class ActivityDTO {
     private boolean isCurrentUserCreator;
     private boolean isCurrentUserParticipant;
 
-
-    public boolean isCreatedBy(User user) {
-        return this.creator != null && this.creator.equals(user);
-    }
-
-    public boolean isCreatedBy(String username) {
-        return this.creator != null && this.creator.getUsername().equals(username);
-    }
 }

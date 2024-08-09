@@ -21,7 +21,6 @@ public class Activity {
     @Lob
     @Column(columnDefinition = "TEXT")
     private String description;
-    private int rating;
     private String location;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -51,12 +50,11 @@ public class Activity {
     public Activity() {
     }
 
-    public Activity(String name, String description, int rating, String location,
+    public Activity(String name, String description, String location,
             LocalDateTime startTime, LocalDateTime endTime, double minPrice,
             double maxPrice, int minParticipants, int maxParticipants) {
         this.name = name;
         this.description = description;
-        this.rating = rating;
         this.location = location;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -66,12 +64,11 @@ public class Activity {
         this.maxParticipants = maxParticipants;
     }
 
-    public Activity(String name, String description, int rating, String location,
+    public Activity(String name, String description, String location,
             LocalDateTime startTime, LocalDateTime endTime, double minPrice,
             double maxPrice, int minParticipants, int maxParticipants, String imagePath) {
         this.name = name;
         this.description = description;
-        this.rating = rating;
         this.location = location;
         this.startTime = startTime;
         this.endTime = endTime;

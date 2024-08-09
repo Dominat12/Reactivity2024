@@ -179,7 +179,7 @@ public class ActivityController {
           @PathVariable Long activityId,
           Authentication authentication) {
     String username = authentication.getName();
-    Rating rating = ratingService.getRating(activityId, username);
+    Rating rating = ratingService.getRating(activityId, username); //TODO Rating wird nur verwendet, wenn man nur die Ratings haben möchte, ansonsten verwendet man das aus der Activity
     return ResponseEntity.ok(rating);
   }
 

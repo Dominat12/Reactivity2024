@@ -64,6 +64,22 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticipate, on
           </div>
         </div>
       </div>
+
+      <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Star className="w-4 h-4 text-claude-yellow mr-1" />
+            <span>{activity.averageRating !== undefined ? activity.averageRating.toFixed(1) : 'N/A'}</span>
+          </div>
+          {activity.userRating !== undefined && (
+            <div className="flex items-center">
+              <span className="text-xs">Your rating:</span>
+              <Star className="w-4 h-4 text-claude-yellow ml-1" />
+              <span>{activity.userRating}</span>
+            </div>
+          )}
+        </div>
+
+
       <div className="flex justify-between items-center mt-4">
 
         {activity.currentUserCreator ? (

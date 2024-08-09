@@ -115,6 +115,7 @@ public class ActivityService {
     }
 
 
+
     //// UTILITY
     public ActivityDTO getActivityById(Long id, String currentUsername) {
         Activity activity = activityRepository.findById(id)

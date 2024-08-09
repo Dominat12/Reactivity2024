@@ -6,6 +6,7 @@ import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import Toast from '../components/Toast';
 import axios from 'axios';
+import RatingComponent from '../components/RatingComponent';
 
 const ActivityDetailView: React.FC = () => {
   const [activity, setActivity] = useState<Activity | null>(null);
@@ -15,6 +16,7 @@ const ActivityDetailView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isActivityFull = activity ? activity.participants.length >= activity.maxParticipants : false;
+  const canRate = activity?.currentUserParticipant || activity?.currentUserCreator;
 
   useEffect(() => {
     if (id) {
@@ -143,7 +145,7 @@ const ActivityDetailView: React.FC = () => {
             </div>
           </div>
         </div>
-
+  
         <div className="p-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="flex items-center">
@@ -212,6 +214,12 @@ const ActivityDetailView: React.FC = () => {
             </div>
           </div>
           
+          {/* Neue Sektion für Bewertungen */}
+          <div className="mb-6 border-t border-gray-200 pt-6">
+            <h2 className="text-2xl font-semibold mb-4">Bewertung</h2>
+            <RatingComponent activityId={activity.id} canRate={canRate} />
+          </div>
+          
           {activity.currentUserParticipant ? (
             <button 
               className="w-full py-3 px-4 rounded-lg text-white font-semibold bg-red-500 hover:bg-red-600 transition-colors duration-300 flex items-center justify-center"
@@ -224,7 +232,7 @@ const ActivityDetailView: React.FC = () => {
             <div className="text-claude-subtext mt-4 text-center p-3 bg-gray-100 rounded-lg">
               Diese Aktivität ist leider bereits voll. Sie können sich nicht mehr anmelden.
             </div>
-          )  : activity.currentUserCreator ? (
+          ) : activity.currentUserCreator ? (
             <div className="text-claude-subtext mt-4 text-center p-3 bg-gray-100 rounded-lg">
               Du bist der Ersteller dieser Aktivität.
             </div>

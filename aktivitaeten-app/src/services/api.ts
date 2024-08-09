@@ -21,6 +21,8 @@ export interface Activity {
   currentUserCreator: boolean;
   currentUserParticipant: boolean;
   participants: Participant[];
+  averageRating?: number; 
+  userRating?: number; 
 }
 
 
@@ -75,6 +77,14 @@ export interface ActivityPage {
   number: number;
 }
 
+export interface Rating {
+  id: number;
+  score: number;
+  comment?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 //Get Activities
 export const getActivities = () => api.get<Activity[]>('/activities');
 export const getActivity = (id: number) => api.get<Activity>(`/activities/${id}`);
@@ -97,6 +107,10 @@ export const getParticipatingActivities = (page = 0, size = 10) =>   api.get<Act
 // User Profile
 export const getUserProfile = () => api.get<UserProfile>('/users/profile');
 export const updateUserProfile = (profile: UserProfileUpdate) => api.put<UserProfile>('/users/profile', profile);
+
+// Ratings
+export const getUserRating = (activityId: number) => api.get<Rating>(`/activities/${activityId}/rating`);
+export const rateActivity = (activityId: number, score: number, comment?: string) => api.post<Rating>(`/activities/${activityId}/rate`, null, { params: { score, comment } });
 
 
 export default api;
