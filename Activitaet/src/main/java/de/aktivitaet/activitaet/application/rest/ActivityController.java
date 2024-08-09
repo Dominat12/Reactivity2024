@@ -164,14 +164,14 @@ public class ActivityController {
 
 // RATE ACTIVITY
   @PostMapping("/{activityId}/rate")
-  public ResponseEntity<Rating> rateActivity(
+  public ResponseEntity<ActivityDTO> rateActivity(
           @PathVariable Long activityId,
           @RequestParam int score,
           @RequestParam(required = false) String comment,
           Authentication authentication) {
     String username = authentication.getName();
     Rating rating = ratingService.rateActivity(activityId, username, score, comment);
-    return ResponseEntity.ok(rating);
+    return ResponseEntity.ok(rating); //TODO aktualisierte Activity liefern
   }
 
   @GetMapping("/{activityId}/rating")
